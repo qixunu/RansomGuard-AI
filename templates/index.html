@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>RansomGuard AI · 勒索软件检测</title>
+  <link rel="stylesheet" href="/static/style.css"/>
+</head>
+<body>
+  <header class="header">
+    <div class="logo">
+      <span class="icon">🛡</span>
+      <div>
+        <h1>RansomGuard AI</h1>
+        <p class="subtitle">基于多模型融合 + AI 大语言模型的勒索软件检测系统</p>
+      </div>
+    </div>
+    <div class="status" id="status-badge"></div>
+  </header>
+
+  <main class="main">
+    <section class="card">
+      <h2>1 · 上传待检测的 PE 文件</h2>
+      <p class="hint">支持 .exe / .dll / .sys 等 Windows 可执行文件，单文件 ≤ 512MB</p>
+      <form id="upload-form" enctype="multipart/form-data">
+        <input type="file" id="file-input" name="file" accept=".exe,.dll,.sys,.bin,*" required/>
+        <div class="row">
+          <label>
+            <input type="checkbox" id="use-llm" checked />
+            <span>启用 LLM 推理（更具解释性）</span>
+          </label>
+          <select id="llm-provider">
+            <option value="mock" selected>本地规则引擎（演示，无需 Key）</option>
+            <option value="dashscope">阿里云百炼（通义千问）</option>
+            <option value="deepseek">DeepSeek</option>
+            <option value="openai">OpenAI</option>
+            <option value="anthropic">Anthropic Claude</option>
+            <option value="local_http">本地 HTTP (OpenAI 兼容，如 ollama)</option>
+          </select>
+        </div>
+        <div id="api-key-row" class="row hidden">
+          <label for="api-key">API Key:</label>
+          <input type="password" id="api-key" placeholder="输入 API Key" />
+          <label for="api-base">Base URL (可选):</label>
+          <input type="text" id="api-base" placeholder="https://api.example.com/v1" />
+          <label for="api-model">Model:</label>
+          <input type="text" id="api-model" placeholder="例如 gpt-4o-mini" />
+        </div>
+        <button type="submit" class="primary" id="submit-btn">开始检测</button>
+      </form>
+    </section>
+
+    <section class="card hidden" id="progress-card">
+      <h2>2 · 正在分析...</h2>
+      <div class="progress">
+        <div class="bar" id="progress-bar"></div>
+      </div>
+      <pre id="progress-log"></pre>
+    </section>
+
+    <section class="card hidden" id="result-card">
+      <h2>3 · 检测结果</h2>
+      <div id="result-slot"></div>
+    </section>
+
+    <section class="card">
+      <h2>4 · 批量扫描 CSV（6 模型置信度 → LLM 判决）</h2>
+      <p class="hint">CSV 需要包含列: <code>hash, CFG, EH, GI, OP, PF, RB</code>。可选 <code>label</code> 列用于指标计算。</p>
+      <form id="csv-form" enctype="multipart/form-data">
+        <input type="file" id="csv-input" name="csv" accept=".csv" required/>
+        <label>
+          <span>处理数量上限:</span>
+          <input type="number" id="csv-limit" value="50" min="1" max="10000" />
+        </label>
+        <button type="submit" class="secondary" id="csv-btn">批量检测</button>
+      </form>
+      <div id="csv-result"></div>
+    </section>
+
+    <section class="card">
+      <h2>5 · 加载示例数据（1000 条真实样本）</h2>
+      <p class="hint">点击按钮即可加载内置的示例置信度数据集，查看批量检测效果。</p>
+      <button class="secondary" id="demo-btn">加载示例并运行</button>
+      <div id="demo-result"></div>
+    </section>
+  </main>
+
+  <footer>
+    <p>RansomGuard AI · v1.0.0 · 基于 AI 大模型的勒索软件检测产品（科研复现）</p>
+  </footer>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
